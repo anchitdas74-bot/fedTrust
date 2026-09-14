@@ -44,11 +44,10 @@ def get_nodes() -> list[FederatedNode]:
 
 @router.get("/rounds", response_model=list[FederatedRound])
 def get_rounds() -> list[FederatedRound]:
-    return [
-        FederatedRound(round_number=1, global_reconstruction_loss=0.091),
-        FederatedRound(round_number=2, global_reconstruction_loss=0.071),
-        FederatedRound(round_number=3, global_reconstruction_loss=0.055),
-        FederatedRound(round_number=4, global_reconstruction_loss=0.047),
-        FederatedRound(round_number=5, global_reconstruction_loss=0.041),
-    ]
+    return service.get_rounds()
+
+
+@router.post("/aggregate", response_model=FederatedRound)
+def trigger_aggregation_round() -> FederatedRound:
+    return service.aggregate_round()
 

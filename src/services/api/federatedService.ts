@@ -4,17 +4,23 @@ import { MOCK_FEDERATED_NODES, MOCK_FEDERATED_LOSS_HISTORY } from '../mockData';
 
 // Maps backend FederatedNode schema to frontend FederatedNode type
 function mapNode(n: any): FederatedNode {
+  const status: FederatedNode['status'] =
+    n.connection_status !== 'connected'
+      ? 'disconnected'
+      : n.local_training_status === 'training'
+        ? 'training'
+        : 'connected';
+
   return {
     id: n.node_id,
     name: n.name,
-    bankId: n.node_id?.toUpperCase(),
-    connectionStatus: n.connection_status === 'connected' ? 'online' : 'offline',
-    trainingStatus: n.local_training_status,
+    code: n.node_id?.toUpperCase() ?? '',
+    status,
     localLoss: n.local_reconstruction_loss,
-    modelUpdateStatus: n.model_update_status,
-    lastSyncAt: new Date().toISOString(),
-    roundsCompleted: 5,
-  } as unknown as FederatedNode;
+    sampleCount: 0,
+    modelVersion: n.model_update_status,
+    lastGradientUpdate: new Date().toISOString(),
+  };
 }
 
 export const federatedService = {
@@ -59,9 +65,15 @@ export const federatedService = {
 
   async triggerAggregationRound(): Promise<{ round: number; globalLoss: number; message: string }> {
     try {
-      // Backend doesn't have an aggregate endpoint - try posting to federated/rounds
+      // Backend endpoint: POST /federated/aggregate -> FederatedRound { round_number, global_reconstruction_loss }
       const res = await apiClient.post('/federated/aggregate');
-      return res.data;
+      const round = res.data.round_number;
+      const globalLoss = res.data.global_reconstruction_loss;
+      return {
+        round,
+        globalLoss,
+        message: `Federated Round ${round} aggregated via FedAvg across 3 connected bank nodes. Global model updated successfully.`,
+      };
     } catch {
       const nextRound = MOCK_FEDERATED_LOSS_HISTORY.length + 1;
       const nextLoss = 0.0125;

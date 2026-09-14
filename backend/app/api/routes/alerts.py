@@ -29,3 +29,11 @@ def get_alert(alert_id: str) -> Alert:
         raise HTTPException(status_code=404, detail="Alert not found")
     return alert
 
+
+@router.post("/{alert_id}/resolve")
+def resolve_alert(alert_id: str) -> dict[str, bool | str]:
+    resolved = repository.resolve_alert(alert_id)
+    if not resolved:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return {"success": True, "message": f"Alert {alert_id} marked as resolved."}
+

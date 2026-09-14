@@ -11,19 +11,43 @@ except ImportError:  # pragma: no cover
     DataLoader = None  # type: ignore[assignment]
     TensorDataset = None  # type: ignore[assignment]
 
-from app.schemas import FederatedStatus
+from app.schemas import FederatedRound, FederatedStatus
 
 
 class FederatedTrainingStatusService:
+    def __init__(self) -> None:
+        self._rounds: list[FederatedRound] = [
+            FederatedRound(round_number=1, global_reconstruction_loss=0.091),
+            FederatedRound(round_number=2, global_reconstruction_loss=0.071),
+            FederatedRound(round_number=3, global_reconstruction_loss=0.055),
+            FederatedRound(round_number=4, global_reconstruction_loss=0.047),
+            FederatedRound(round_number=5, global_reconstruction_loss=0.041),
+        ]
+
     def get_status(self) -> FederatedStatus:
+        latest = self._rounds[-1]
+        previous = self._rounds[-2] if len(self._rounds) > 1 else latest
         return FederatedStatus(
             strategy="Flower FedAvg",
-            rounds_completed=5,
+            rounds_completed=len(self._rounds),
             participating_nodes=3,
-            global_reconstruction_loss=0.041,
-            last_round_delta=-0.006,
+            global_reconstruction_loss=latest.global_reconstruction_loss,
+            last_round_delta=round(latest.global_reconstruction_loss - previous.global_reconstruction_loss, 4),
             status="ready",
         )
+
+    def get_rounds(self) -> list[FederatedRound]:
+        return list(self._rounds)
+
+    def aggregate_round(self) -> FederatedRound:
+        """Simulate one more FedAvg round by decaying the current global loss."""
+        latest_loss = self._rounds[-1].global_reconstruction_loss
+        next_round = FederatedRound(
+            round_number=len(self._rounds) + 1,
+            global_reconstruction_loss=round(max(latest_loss * 0.85, 0.005), 4),
+        )
+        self._rounds.append(next_round)
+        return next_round
 
 
 def continuous_federated_update(

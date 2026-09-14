@@ -21,7 +21,7 @@ export const systemService = {
       return {
         mlService: mapStatus(d.ml_service?.status ?? 'unavailable'),
         rfService: mapStatus(d.rf_service?.status ?? 'unavailable'),
-        backendConnection: 'connected' as ConnectionStatus,
+        backendConnection: 'online' as ConnectionStatus,
         connectedBankNodes: 3,
         totalBankNodes: 3
       };

@@ -7,6 +7,7 @@ class DemoRepository:
     def __init__(self) -> None:
         self.risk_engine = RiskEngine()
         self.records: dict[str, TransactionRecord] = {}
+        self.resolved_alert_ids: set[str] = set()
         for transaction in DEMO_CASES:
             score = self.risk_engine.score(transaction)
             self.records[transaction.transaction_id] = TransactionRecord(
@@ -91,6 +92,12 @@ class DemoRepository:
     def get_alert(self, alert_id: str) -> Alert | None:
         return next((alert for alert in self.list_alerts() if alert.alert_id == alert_id), None)
 
+    def resolve_alert(self, alert_id: str) -> bool:
+        if self.get_alert(alert_id) is None:
+            return False
+        self.resolved_alert_ids.add(alert_id)
+        return True
+
     @staticmethod
     def _security_actions(decision: Decision) -> list[str]:
         if decision == Decision.APPROVED:
@@ -99,15 +106,15 @@ class DemoRepository:
             return ["Send 6-digit OTP", "Hold transaction pending customer verification"]
         return ["Block transaction", "Create security alert", "Queue for analyst review"]
 
-    @staticmethod
-    def _alert_from_record(record: TransactionRecord) -> Alert:
+    def _alert_from_record(self, record: TransactionRecord) -> Alert:
         score = record.score
         transaction = record.transaction
         severity = AlertSeverity.MEDIUM
         if score.risk_level.value == "high":
             severity = AlertSeverity.CRITICAL if score.rf_trust_score < 0.2 else AlertSeverity.HIGH
+        alert_id = f"alert-{transaction.transaction_id}"
         return Alert(
-            alert_id=f"alert-{transaction.transaction_id}",
+            alert_id=alert_id,
             transaction_id=transaction.transaction_id,
             severity=severity,
             timestamp=transaction.timestamp or "2026-09-14T00:00:00Z",
@@ -122,6 +129,7 @@ class DemoRepository:
             final_risk_score=score.risk_score,
             action_taken=score.decision,
             alert_type="transaction_risk",
+            is_resolved=alert_id in self.resolved_alert_ids,
         )
 
 

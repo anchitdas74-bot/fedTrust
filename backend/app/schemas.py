@@ -221,6 +221,7 @@ class Alert(BaseModel):
     final_risk_score: float
     action_taken: Decision
     alert_type: str
+    is_resolved: bool = False
 
 
 class SystemServiceState(BaseModel):

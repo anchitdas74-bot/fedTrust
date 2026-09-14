@@ -1,48 +1,65 @@
 import { apiClient } from './apiClient';
 import type { Transaction, TransactionStatus } from '../../types';
 import { MOCK_TRANSACTIONS, DEMO_SCENARIOS } from '../mockData';
+import { mapDecisionToAction, mapShapExplanations, toPercent } from '../mapping';
 
-// Maps backend TransactionRecord {transaction, score} to frontend Transaction shape
+function mapStatus(status: string | null | undefined, decision: string | null | undefined): TransactionStatus {
+  const value = status ?? decision ?? 'approved';
+  if (value === 'pending_verification') return 'PENDING_VERIFICATION';
+  if (value === 'blocked') return 'BLOCKED';
+  return 'APPROVED';
+}
+
+function mapContextualFactors(record: any): string[] {
+  const analysis = record.contextual_analysis;
+  if (!analysis) return record.score?.reasons ?? [];
+
+  const factors: string[] = [];
+  if (analysis.unusual_amount) factors.push('Transaction amount is above the customer baseline');
+  if (analysis.high_velocity) factors.push('High transaction velocity in the last hour');
+  if (analysis.unusual_time) factors.push('Transaction occurred at an unusual hour');
+  if (analysis.location_change) factors.push('Location is far from the customer home base');
+  return factors.length ? factors : ['No elevated contextual risk factors'];
+}
+
+// Maps backend TransactionRecord/TransactionDetails {transaction, score, ...} to the frontend Transaction shape
 function mapRecord(record: any): Transaction {
   const t = record.transaction ?? record;
   const s = record.score ?? {};
+  const anomalyScore = s.anomaly_score ?? 0;
+  const rfTrustScore = s.rf_trust_score ?? 1;
+
   return {
     id: t.transaction_id,
-    customerId: t.customer_id,
     amount: t.amount,
+    currency: 'INR',
     merchant: t.merchant,
-    merchantCategory: t.merchant_category,
-    country: t.country,
+    category: t.merchant_category,
     location: t.location,
     timestamp: t.timestamp ?? new Date().toISOString(),
-    hourOfDay: t.hour_of_day,
-    transactionsLastHour: t.transactions_last_hour,
-    distanceFromHomeKm: t.distance_from_home_km,
-    terminalId: t.terminal?.terminal_id,
-    riskScore: s.risk_score ?? 0,
+    terminalId: t.terminal?.terminal_id ?? '',
+    cardholderId: t.customer_id,
+    cardholderName: `Customer ${t.customer_id}`,
+    velocityCount1h: t.transactions_last_hour,
+    previousLocation: t.location,
+
+    reconstructionError: anomalyScore,
+    anomalyScore: toPercent(anomalyScore),
+    isMLAnomalous: anomalyScore >= 0.45,
+
+    rfTrustScore: toPercent(rfTrustScore),
+    isRFVerified: rfTrustScore >= 0.7,
+
+    contextualRiskScore: toPercent(s.contextual_risk_score),
+    contextualFactors: mapContextualFactors(record),
+
+    finalRiskScore: toPercent(s.risk_score),
     riskLevel: (s.risk_level?.toUpperCase() ?? 'LOW') as Transaction['riskLevel'],
-    status: (s.status?.toUpperCase() ?? s.decision?.toUpperCase() ?? 'APPROVED') as TransactionStatus,
-    action: s.action ?? s.decision ?? 'Approve',
-    anomalyScore: s.anomaly_score ?? 0,
-    rfTrustScore: s.rf_trust_score ?? 1,
-    reasons: s.reasons ?? [],
+    status: mapStatus(s.status, s.decision),
+    finalAction: mapDecisionToAction(s.decision ?? s.action),
     explanation: s.reasons?.[0] ?? '',
-    shapFeatures: (s.explanations ?? []).map((e: any) => ({
-      feature: e.feature,
-      impact: e.impact,
-      direction: e.direction,
-      message: e.message,
-    })),
-    rfTelemetry: t.terminal ? {
-      terminalId: t.terminal.terminal_id,
-      frequencyGHz: t.terminal.frequency_ghz,
-      rssiDbm: t.terminal.rssi_dbm,
-      returnLossS11Db: t.terminal.s11_db,
-      pathLossDb: t.terminal.path_loss_db,
-      isVerified: (s.rf_trust_score ?? 0) >= 0.7,
-      trustScore: s.rf_trust_score ?? 0,
-    } : undefined,
-  } as unknown as Transaction;
+    shapFeatures: mapShapExplanations(s.explanations),
+  };
 }
 
 export const transactionService = {
