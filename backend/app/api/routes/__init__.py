@@ -1,0 +1,2 @@
+"""FedTrust route modules."""
+
