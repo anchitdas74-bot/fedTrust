@@ -1,45 +1,156 @@
-from app.schemas import Decision, RiskLevel, TransactionRequest, TransactionScoreResponse
-from app.services.anomaly import MockAnomalyScorer
+from app.schemas import (
+    Decision,
+    RiskLevel,
+    TransactionRequest,
+    TransactionScoreResponse,
+)
+from app.services.anomaly import (
+    FedGuardAnomalyScorer,
+    MockAnomalyScorer,
+)
 from app.services.rf_auth import RfAuthenticator
 
 
 class RiskEngine:
     def __init__(
         self,
-        anomaly_scorer: MockAnomalyScorer | None = None,
+        anomaly_scorer=None,
         rf_authenticator: RfAuthenticator | None = None,
     ) -> None:
-        self.anomaly_scorer = anomaly_scorer or MockAnomalyScorer()
+        # Real trained FedGuard model
+        self.fedguard_scorer = FedGuardAnomalyScorer()
+
+        # Existing fallback for old demo transactions
+        self.mock_scorer = MockAnomalyScorer()
+
         self.rf_authenticator = rf_authenticator or RfAuthenticator()
 
-    def score(self, transaction: TransactionRequest) -> TransactionScoreResponse:
-        anomaly = self.anomaly_scorer.score(transaction)
+    def score(
+        self,
+        transaction: TransactionRequest,
+    ) -> TransactionScoreResponse:
+
+        # ---------------------------------------------------------
+        # 1. BEHAVIORAL / ML LAYER
+        # ---------------------------------------------------------
+
+        if transaction.ml_features is not None:
+            anomaly = self.fedguard_scorer.score_features(
+                transaction.ml_features
+            )
+            ml_anomalous = (
+                anomaly.raw_reconstruction_error is not None
+                and anomaly.raw_reconstruction_error
+                >= self.fedguard_scorer.threshold
+            )
+        else:
+            anomaly = self.mock_scorer.score(transaction)
+            ml_anomalous = anomaly.reconstruction_error >= 0.45
+
+        # ---------------------------------------------------------
+        # 2. RF TERMINAL TRUST LAYER
+        # ---------------------------------------------------------
+
         rf = self.rf_authenticator.verify(transaction.terminal)
 
+        # ---------------------------------------------------------
+        # 3. CONTEXTUAL RISK
+        # ---------------------------------------------------------
+
         contextual_risk = self._contextual_risk(transaction)
+
+        # RF risk = inverse of terminal trust
         rf_risk = 1.0 - rf.trust_score
+
+        # ---------------------------------------------------------
+        # 4. FINAL RISK SCORE
+        #
+        # 52% Behavioral ML
+        # 32% RF terminal trust
+        # 16% Context
+        # ---------------------------------------------------------
+
         risk_score = (
             (0.52 * anomaly.reconstruction_error)
             + (0.32 * rf_risk)
             + (0.16 * contextual_risk)
         )
+
         risk_score = min(max(risk_score, 0.0), 1.0)
 
-        if not rf.verified and anomaly.reconstruction_error >= 0.55:
+        # ---------------------------------------------------------
+        # 5. DECISION ENGINE
+        #
+        # IMPORTANT:
+        # Real FedGuard uses the GWO raw reconstruction threshold.
+        # Current trained threshold = 2.5
+        #
+        # anomaly.reconstruction_error is normalized to [0,1]
+        # and is used for the weighted risk score.
+        # ---------------------------------------------------------
+
+        if not rf.verified and ml_anomalous:
             risk_level = RiskLevel.HIGH
             decision = Decision.BLOCKED
+
         elif risk_score >= 0.68 or not rf.verified:
             risk_level = RiskLevel.HIGH
             decision = Decision.BLOCKED
-        elif risk_score >= 0.38 or anomaly.reconstruction_error >= 0.45:
+
+        elif risk_score >= 0.38 or ml_anomalous:
             risk_level = RiskLevel.MEDIUM
             decision = Decision.STEP_UP_VERIFICATION
+
         else:
             risk_level = RiskLevel.LOW
             decision = Decision.APPROVED
 
-        status = self._status_from_decision(decision)
-        reasons = self._build_reasons(anomaly.reconstruction_error, rf.reasons, risk_level)
+        # ---------------------------------------------------------
+        # 6. EXPLANATIONS
+        # ---------------------------------------------------------
+
+        reasons = []
+
+        if ml_anomalous:
+            if anomaly.model_used == "FedGuard PyTorch Autoencoder":
+                raw_error = anomaly.raw_reconstruction_error
+
+                reasons.append(
+                    "FedGuard behavioral model detected an anomalous "
+                    "transaction pattern "
+                    f"(reconstruction error: {raw_error:.5f}, "
+                    f"threshold: {self.fedguard_scorer.threshold:.5f})."
+                )
+            else:
+                reasons.append(
+                    "Behavioral anomaly detected in transaction activity."
+                )
+
+        if not rf.verified:
+            reasons.append(
+                "Terminal failed RF trust verification."
+            )
+        elif rf.trust_score < 0.8:
+            reasons.append(
+                "Terminal RF trust score is below the normal range."
+            )
+
+        if contextual_risk >= 0.4:
+            reasons.append(
+                "Transaction context indicates elevated risk."
+            )
+
+        if not reasons:
+            reasons.append(
+                "Transaction behavior and terminal trust are within "
+                "the expected range."
+            )
+
+        # ---------------------------------------------------------
+        # 7. STATUS
+        # ---------------------------------------------------------
+
+        status = self._status_for_decision(decision)
 
         return TransactionScoreResponse(
             transaction_id=transaction.transaction_id,
@@ -55,49 +166,35 @@ class RiskEngine:
             action=decision.value,
         )
 
-    @staticmethod
-    def _contextual_risk(transaction: TransactionRequest) -> float:
-        score = 0.0
-        if transaction.amount > 25000:
-            score += 0.25
+    def _contextual_risk(
+        self,
+        transaction: TransactionRequest,
+    ) -> float:
+
+        risk = 0.0
+
+        if transaction.amount >= 100000:
+            risk += 0.25
+
         if transaction.transactions_last_hour >= 5:
-            score += 0.25
-        if transaction.hour_of_day <= 5 or transaction.hour_of_day >= 23:
-            score += 0.15
+            risk += 0.25
+
+        if transaction.distance_from_home_km >= 500:
+            risk += 0.25
+
+        if transaction.hour_of_day <= 5:
+            risk += 0.15
+
         if transaction.country != "IN":
-            score += 0.2
-        if transaction.distance_from_home_km > 500:
-            score += 0.15
-        return min(score, 1.0)
+            risk += 0.20
 
-    @staticmethod
-    def _status_from_decision(decision: Decision):
-        from app.schemas import TransactionStatus
+        return min(risk, 1.0)
 
+    def _status_for_decision(self, decision: Decision) -> str:
         if decision == Decision.APPROVED:
-            return TransactionStatus.APPROVED
+            return "approved"
+
         if decision == Decision.STEP_UP_VERIFICATION:
-            return TransactionStatus.PENDING_VERIFICATION
-        return TransactionStatus.BLOCKED
+            return "pending_verification"
 
-    @staticmethod
-    def _build_reasons(
-        anomaly_score: float,
-        rf_reasons: list[str],
-        risk_level: RiskLevel,
-    ) -> list[str]:
-        reasons: list[str] = []
-        if anomaly_score < 0.35:
-            reasons.append("Behavioral pattern is close to the learned customer baseline")
-        elif anomaly_score < 0.6:
-            reasons.append("Behavioral shift detected, but RF terminal identity is considered")
-        else:
-            reasons.append("Strong behavioral anomaly detected")
-
-        reasons.extend(rf_reasons)
-        if risk_level == RiskLevel.MEDIUM:
-            reasons.append("Step-up verification recommended instead of immediate blocking")
-        if risk_level == RiskLevel.HIGH:
-            reasons.append("Transaction should be blocked pending manual or customer review")
-
-        return reasons
+        return "blocked"

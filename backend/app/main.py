@@ -1,7 +1,17 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import alerts, auth, explainability, federated, rf, risk, system, transactions
+from app.api.routes import (
+    alerts,
+    auth,
+    explainability,
+    federated,
+    rf,
+    risk,
+    simulator,
+    system,
+    transactions,
+)
 from app.demo_data import DEMO_CASES, TERMINALS
 from app.schemas import FederatedStatus, TerminalProfile, TransactionRequest, TransactionScoreResponse
 from app.services.federated import FederatedTrainingStatusService
@@ -26,6 +36,7 @@ federated_status = FederatedTrainingStatusService()
 
 app.include_router(auth.router)
 app.include_router(transactions.router)
+app.include_router(simulator.router)
 app.include_router(risk.router)
 app.include_router(rf.router)
 app.include_router(federated.router)

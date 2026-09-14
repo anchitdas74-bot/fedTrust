@@ -5,23 +5,77 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+
   server: {
     port: 5173,
     strictPort: false,
+
     proxy: {
-      // Proxy all API calls to the FastAPI backend
-      '/auth': { target: 'http://localhost:8000', changeOrigin: true },
-      '/transactions': { target: 'http://localhost:8000', changeOrigin: true },
-      '/rf': { target: 'http://localhost:8000', changeOrigin: true },
-      '/risk': { target: 'http://localhost:8000', changeOrigin: true },
-      '/federated': { target: 'http://localhost:8000', changeOrigin: true },
-      '/explainability': { target: 'http://localhost:8000', changeOrigin: true },
-      '/alerts': { target: 'http://localhost:8000', changeOrigin: true },
-      '/system': { target: 'http://localhost:8000', changeOrigin: true },
-      '/health': { target: 'http://localhost:8000', changeOrigin: true },
-      '/demo': { target: 'http://localhost:8000', changeOrigin: true },
-    }
-  }
+      // Authentication
+      '/auth': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // Transactions
+      '/transactions': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // Live Demo Simulator
+      '/simulator': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // RF Authentication
+      '/rf': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // Risk Engine + Step-Up Verification
+      '/risk': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // Federated Network
+      '/federated': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // Explainability
+      '/explainability': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // Alerts
+      '/alerts': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // System
+      '/system': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // Health
+      '/health': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      // Demo
+      '/demo': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
+  },
 })
-
-

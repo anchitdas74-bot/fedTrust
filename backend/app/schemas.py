@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import Literal
 
@@ -39,19 +41,25 @@ class TerminalBeacon(BaseModel):
 
 
 class TransactionRequest(BaseModel):
-    transaction_id: str = Field(..., examples=["txn-demo-a"])
-    customer_id: str = Field(..., examples=["cust-1042"])
-    amount: float = Field(..., ge=0, examples=[1299.0])
-    merchant: str = Field("Demo Merchant", examples=["FreshMart"])
-    merchant_category: str = Field(..., examples=["grocery"])
-    country: str = Field(..., min_length=2, max_length=2, examples=["IN"])
-    location: str = Field("Unknown", examples=["Mumbai, IN"])
-    timestamp: str | None = Field(None, examples=["2026-09-14T10:30:00Z"])
-    hour_of_day: int = Field(..., ge=0, le=23, examples=[18])
-    transactions_last_hour: int = Field(..., ge=0, examples=[1])
-    distance_from_home_km: float = Field(..., ge=0, examples=[4.2])
+    transaction_id: str
+    customer_id: str
+    amount: float
+    merchant: str
+    merchant_category: str
+    country: str
+    location: str
+    timestamp: str
+    hour_of_day: int
+    transactions_last_hour: int
+    distance_from_home_km: float
     previous_transaction_id: str | None = None
     terminal: TerminalBeacon
+
+    ml_features: list[float] | None = Field(
+        default=None,
+        min_length=29,
+        max_length=29,
+    )
 
 
 class FeatureExplanation(BaseModel):
@@ -170,8 +178,14 @@ class StepUpResult(BaseModel):
     message: str
 
 
+class RfSignaturePoint(BaseModel):
+    freq: float
+    s11: float
+
+
 class RfStatus(BaseModel):
     current_terminal_id: str
+    authorized_terminal_id: str = "RF-TERM-8092"
     expected_frequency_ghz: float
     observed_frequency_ghz: float
     rssi_dbm: float
@@ -181,6 +195,8 @@ class RfStatus(BaseModel):
     trust_score: float
     verified: bool
     status: Literal["available", "unavailable"]
+    expected_signature: list[RfSignaturePoint] = Field(default_factory=list)
+    observed_signature: list[RfSignaturePoint] = Field(default_factory=list)
 
 
 class FederatedNode(BaseModel):
