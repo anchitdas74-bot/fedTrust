@@ -5,7 +5,7 @@ import {
   Receipt,
   Search,
   Download,
-  ArrowRight
+  ArrowUpRight
 } from 'lucide-react';
 
 export const TransactionsPage: React.FC = () => {
@@ -17,7 +17,7 @@ export const TransactionsPage: React.FC = () => {
   const [rfFilter, setRfFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'timestamp' | 'amount' | 'riskScore'>('timestamp');
 
-  // Filter transactions
+  // Multi-signal filtered list
   const filteredTxns = transactions.filter(t => {
     const matchesSearch =
       t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -64,35 +64,35 @@ export const TransactionsPage: React.FC = () => {
       {/* Title & Controls Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2.5 font-mono">
-            <Receipt className="w-6 h-6 text-cyan-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5 font-mono">
+            <Receipt className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
             <span>TRANSACTION HISTORY & SEARCH</span>
           </h1>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
             Complete audit trail of all real-time and processed transactions across connected bank terminals.
           </p>
         </div>
 
         <button
           onClick={handleExportCSV}
-          className="py-2.5 px-4 rounded-xl text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 transition-all flex items-center gap-2"
+          className="py-2.5 px-4 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2 shadow-xs"
         >
-          <Download className="w-4 h-4 text-cyan-400" />
+          <Download className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
           <span>Export CSV Audit Log</span>
         </button>
       </div>
 
       {/* Search & Multi-Filter Bar */}
-      <div className="glass-panel p-4 rounded-2xl border border-gray-800 flex flex-wrap items-center justify-between gap-3">
+      <div className="glass-panel p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-[240px]">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-gray-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search by Txn ID, merchant, cardholder, terminal..."
-              className="w-full pl-9 pr-4 py-2 bg-gray-950 border border-gray-800 rounded-xl text-xs text-cyan-300 focus:outline-none focus:border-cyan-500"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-cyan-300 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
             />
           </div>
         </div>
@@ -102,7 +102,7 @@ export const TransactionsPage: React.FC = () => {
           <select
             value={riskFilter}
             onChange={e => setRiskFilter(e.target.value)}
-            className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs font-mono text-cyan-300 focus:outline-none"
+            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 dark:text-cyan-300 focus:outline-none focus:border-cyan-500 shadow-xs"
           >
             <option value="ALL">All Risk Levels</option>
             <option value="LOW">Low Risk</option>
@@ -113,7 +113,7 @@ export const TransactionsPage: React.FC = () => {
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs font-mono text-cyan-300 focus:outline-none"
+            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 dark:text-cyan-300 focus:outline-none focus:border-cyan-500 shadow-xs"
           >
             <option value="ALL">All Statuses</option>
             <option value="APPROVED">Approved</option>
@@ -124,7 +124,7 @@ export const TransactionsPage: React.FC = () => {
           <select
             value={rfFilter}
             onChange={e => setRfFilter(e.target.value)}
-            className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs font-mono text-cyan-300 focus:outline-none"
+            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 dark:text-cyan-300 focus:outline-none focus:border-cyan-500 shadow-xs"
           >
             <option value="ALL">All RF Terminals</option>
             <option value="VERIFIED">RF Verified Only</option>
@@ -134,7 +134,7 @@ export const TransactionsPage: React.FC = () => {
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value as any)}
-            className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs font-mono text-purple-300 focus:outline-none"
+            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-purple-700 dark:text-purple-300 focus:outline-none focus:border-purple-500 shadow-xs"
           >
             <option value="timestamp">Sort: Newest</option>
             <option value="riskScore">Sort: Risk Score</option>
@@ -144,31 +144,31 @@ export const TransactionsPage: React.FC = () => {
       </div>
 
       {/* Main Transactions Table */}
-      <div className="glass-panel rounded-2xl border border-gray-800 overflow-hidden">
-        <div className="p-4 border-b border-gray-800 font-mono text-xs font-bold text-gray-400 uppercase flex justify-between items-center">
+      <div className="glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 font-mono text-xs font-bold text-slate-600 dark:text-slate-400 uppercase flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/30">
           <span>Transactions Database ({sortedTxns.length})</span>
-          <span className="text-[11px] text-gray-400 font-normal">Click any row to open full multi-signal drawer</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Click any row to open full multi-signal drawer</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-gray-950/80 text-gray-400 font-mono border-b border-gray-800 uppercase text-[10px]">
+            <thead className="bg-slate-100/90 dark:bg-slate-950/80 text-slate-600 dark:text-slate-400 font-mono border-b border-slate-200 dark:border-slate-800 uppercase text-[10px]">
               <tr>
-                <th className="p-4">Txn ID</th>
-                <th className="p-4">Timestamp</th>
-                <th className="p-4">Merchant & Category</th>
-                <th className="p-4">Amount</th>
-                <th className="p-4">Terminal & RF Trust</th>
-                <th className="p-4">ML Anomaly Score</th>
-                <th className="p-4">Final Score</th>
-                <th className="p-4">Status & Action</th>
-                <th className="p-4 text-right">Details</th>
+                <th className="p-4 font-semibold">Txn ID</th>
+                <th className="p-4 font-semibold">Timestamp</th>
+                <th className="p-4 font-semibold">Merchant & Category</th>
+                <th className="p-4 font-semibold">Amount</th>
+                <th className="p-4 font-semibold">Terminal & RF Trust</th>
+                <th className="p-4 font-semibold">ML Anomaly Score</th>
+                <th className="p-4 font-semibold">Final Score</th>
+                <th className="p-4 font-semibold">Status & Action</th>
+                <th className="p-4 text-right font-semibold">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800/60">
+            <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/60">
               {sortedTxns.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-gray-400">
+                  <td colSpan={9} className="p-8 text-center text-slate-500 dark:text-slate-400">
                     No transactions found matching criteria.
                   </td>
                 </tr>
@@ -177,22 +177,22 @@ export const TransactionsPage: React.FC = () => {
                   <tr
                     key={t.id}
                     onClick={() => openTransactionDetails(t.id)}
-                    className="hover:bg-gray-800/40 transition-colors cursor-pointer"
+                    className="hover:bg-slate-100/70 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
                   >
-                    <td className="p-4 font-mono font-bold text-cyan-400">{t.id}</td>
-                    <td className="p-4 font-mono text-gray-400">{t.timestamp}</td>
+                    <td className="p-4 font-mono font-bold text-cyan-700 dark:text-cyan-400">{t.id}</td>
+                    <td className="p-4 font-mono text-slate-500 dark:text-slate-400">{t.timestamp}</td>
                     <td className="p-4">
-                      <div className="font-bold text-gray-200">{t.merchant}</div>
-                      <div className="text-[11px] text-gray-400">{t.category} • {t.location}</div>
+                      <div className="font-bold text-slate-900 dark:text-slate-200">{t.merchant}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">{t.category} • {t.location}</div>
                     </td>
-                    <td className="p-4 font-mono font-bold text-white">${t.amount.toFixed(2)}</td>
+                    <td className="p-4 font-mono font-extrabold text-slate-900 dark:text-white">${t.amount.toFixed(2)}</td>
                     <td className="p-4">
-                      <div className="font-mono text-cyan-300">{t.terminalId}</div>
+                      <div className="font-mono text-cyan-800 dark:text-cyan-300 font-medium">{t.terminalId}</div>
                       <StatusBadge type="rf" value={t.isRFVerified ? 'VERIFIED' : 'UNVERIFIED'} size="sm" />
                     </td>
-                    <td className="p-4 font-mono text-purple-400 font-bold">{t.anomalyScore}%</td>
+                    <td className="p-4 font-mono text-purple-700 dark:text-purple-400 font-bold">{t.anomalyScore}%</td>
                     <td className="p-4">
-                      <span className="font-mono font-bold px-2 py-0.5 rounded bg-gray-800 border border-gray-700 text-gray-200">
+                      <span className="font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
                         {t.finalRiskScore}/100
                       </span>
                     </td>
@@ -200,14 +200,8 @@ export const TransactionsPage: React.FC = () => {
                       <StatusBadge type="status" value={t.status} size="sm" />
                     </td>
                     <td className="p-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openTransactionDetails(t.id);
-                        }}
-                        className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 inline-flex items-center"
-                      >
-                        <ArrowRight className="w-4 h-4" />
+                      <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                        <ArrowUpRight className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>

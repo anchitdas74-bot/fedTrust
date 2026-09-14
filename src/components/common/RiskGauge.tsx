@@ -12,9 +12,9 @@ export const RiskGauge: React.FC<RiskGaugeProps> = ({ score, label = 'Risk Score
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
-  let colorClass = '#10B981'; // Green (0-30)
-  if (score > 30 && score <= 70) colorClass = '#F59E0B'; // Amber (31-70)
-  if (score > 70) colorClass = '#EF4444'; // Red (71-100)
+  let colorClass = '#10b981'; // Emerald (0-30)
+  if (score > 30 && score <= 70) colorClass = '#f59e0b'; // Amber (31-70)
+  if (score > 70) colorClass = '#ef4444'; // Red (71-100)
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -26,7 +26,7 @@ export const RiskGauge: React.FC<RiskGaugeProps> = ({ score, label = 'Risk Score
             r={radius}
             stroke="currentColor"
             strokeWidth={strokeWidth}
-            className="text-gray-800 dark:text-gray-800/60"
+            className="text-slate-200 dark:text-slate-800 transition-colors"
             fill="transparent"
           />
           <circle
@@ -46,12 +46,12 @@ export const RiskGauge: React.FC<RiskGaugeProps> = ({ score, label = 'Risk Score
           <span className="text-2xl font-extrabold tracking-tight font-mono" style={{ color: colorClass }}>
             {score}
           </span>
-          <span className="text-[10px] uppercase font-semibold text-gray-400 dark:text-gray-400 tracking-wider">
+          <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">
             / 100
           </span>
         </div>
       </div>
-      {label && <span className="mt-2 text-xs font-medium text-gray-400">{label}</span>}
+      {label && <span className="mt-2 text-xs font-semibold text-slate-600 dark:text-slate-400 tracking-wide">{label}</span>}
     </div>
   );
 };

@@ -32,7 +32,7 @@ app/
   demo_data.py             Demo transactions and terminal profiles
   services/
     anomaly.py             Mock anomaly model adapter
-    federated.py           Federated training status adapter
+    federated.py           Federated training status & continual learning engine
     rf_auth.py             RF authentication logic
     risk_engine.py         Final decision engine
     store.py               In-memory transaction/alert repository

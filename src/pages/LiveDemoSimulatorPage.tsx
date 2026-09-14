@@ -56,16 +56,16 @@ export const LiveDemoSimulatorPage: React.FC = () => {
       {/* Title */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2.5 font-mono">
-            <PlaySquare className="w-6 h-6 text-purple-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5 font-mono">
+            <PlaySquare className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             <span>HACKATHON LIVE PIPELINE SIMULATOR</span>
           </h1>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
             Demonstrate real-time decision flow through FedTrust's multi-signal risk engine across preset scenarios.
           </p>
         </div>
 
-        <div className="px-3 py-1 rounded-lg bg-purple-950/40 border border-purple-800/50 text-purple-300 font-mono text-xs font-bold">
+        <div className="px-3.5 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/50 text-purple-700 dark:text-purple-300 font-mono text-xs font-bold shadow-xs">
           DEMO MODE ACTIVE
         </div>
       </div>
@@ -78,27 +78,27 @@ export const LiveDemoSimulatorPage: React.FC = () => {
             <div
               key={scen.code}
               onClick={() => !isSimulating && handleRunSimulation(scen)}
-              className={`p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
+              className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4 shadow-xs hover:shadow-md ${
                 isSelected
-                  ? 'bg-purple-950/40 border-purple-500 shadow-xl shadow-purple-500/10 ring-1 ring-purple-500'
-                  : 'bg-gray-900/60 border-gray-800 hover:border-gray-700'
+                  ? 'bg-purple-50/80 dark:bg-purple-950/40 border-purple-300 dark:border-purple-500 ring-2 ring-purple-400/40'
+                  : 'bg-white/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
               } ${isSimulating ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-xs font-bold text-purple-400">{scen.code}</span>
+                  <span className="font-mono text-xs font-bold text-purple-700 dark:text-purple-400">{scen.code}</span>
                   <StatusBadge type="risk" value={scen.transaction.riskLevel} size="sm" />
                 </div>
-                <h3 className="font-bold text-sm text-gray-100">{scen.title}</h3>
-                <p className="text-xs text-gray-400 mt-2 leading-relaxed">{scen.description}</p>
+                <h3 className="font-bold text-sm text-slate-900 dark:text-gray-100">{scen.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-gray-400 mt-2 leading-relaxed">{scen.description}</p>
               </div>
 
               <button
                 disabled={isSimulating}
                 className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                   isSelected
-                    ? 'bg-purple-600 text-white shadow-md'
-                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                    ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-md'
+                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-slate-700'
                 }`}
               >
                 <Zap className="w-3.5 h-3.5" />
@@ -110,15 +110,15 @@ export const LiveDemoSimulatorPage: React.FC = () => {
       </div>
 
       {/* Pipeline Stage Animator Visualizer */}
-      <div className="glass-panel p-6 rounded-2xl border border-gray-800 space-y-6">
-        <div className="flex items-center justify-between border-b border-gray-800 pb-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2 font-mono">
-            <Sparkles className="w-5 h-5 text-purple-400" />
+      <div className="glass-panel p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+          <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2 font-mono">
+            <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             DECISION PIPELINE PROGRESSION: {selectedCase.name}
           </h3>
 
           {isSimulating && (
-            <span className="text-xs font-mono text-cyan-400 flex items-center gap-1.5 animate-pulse">
+            <span className="text-xs font-mono text-cyan-700 dark:text-cyan-400 flex items-center gap-1.5 animate-pulse font-semibold">
               <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Ingesting & Evaluating Pipeline...
             </span>
           )}
@@ -136,30 +136,30 @@ export const LiveDemoSimulatorPage: React.FC = () => {
                 key={st.step}
                 className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between space-y-2 text-center ${
                   isCurrent
-                    ? 'bg-purple-950/60 border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/25 scale-105 z-10'
+                    ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-400 dark:border-purple-500 ring-2 ring-purple-400/50 shadow-lg shadow-purple-500/20 scale-105 z-10'
                     : isPassed
-                    ? 'bg-gray-900 border-cyan-800/60 text-cyan-300'
-                    : 'bg-gray-950/40 border-gray-800 text-gray-600'
+                    ? 'bg-slate-100 dark:bg-slate-900 border-cyan-300 dark:border-cyan-800/60 text-cyan-800 dark:text-cyan-300'
+                    : 'bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-gray-600'
                 }`}
               >
                 <div className="flex items-center justify-center">
                   <div className={`p-2 rounded-lg border ${
                     isCurrent
-                      ? 'bg-purple-500 text-white border-purple-400'
+                      ? 'bg-purple-600 text-white border-purple-500'
                       : isPassed
-                      ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40'
-                      : 'bg-gray-900 text-gray-600 border-gray-800'
+                      ? 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border-cyan-400/40'
+                      : 'bg-slate-200/60 dark:bg-slate-900 text-slate-500 dark:text-gray-600 border-slate-300 dark:border-gray-800'
                   }`}>
                     <Icon className="w-4 h-4" />
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-[10px] font-mono uppercase font-bold text-gray-400">Step {st.step}</div>
-                  <h4 className="text-xs font-bold text-gray-200 leading-tight mt-0.5">{st.title}</h4>
+                  <div className="text-[10px] font-mono uppercase font-bold text-slate-500 dark:text-gray-400">Step {st.step}</div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-gray-200 leading-tight mt-0.5">{st.title}</h4>
                 </div>
 
-                <p className="text-[10px] text-gray-400 leading-normal">{st.desc}</p>
+                <p className="text-[10px] text-slate-500 dark:text-gray-400 leading-normal">{st.desc}</p>
               </div>
             );
           })}
@@ -167,11 +167,11 @@ export const LiveDemoSimulatorPage: React.FC = () => {
 
         {/* Pipeline Decision Result Summary Box */}
         {activeTxn && (
-          <div className="p-6 rounded-2xl bg-gray-950 border border-gray-800 space-y-4 animate-in fade-in duration-300">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-4">
+          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-4 animate-fade-in shadow-xs">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
               <div>
-                <span className="text-xs font-mono text-cyan-400 uppercase font-bold">Pipeline Output Decision</span>
-                <h3 className="text-xl font-bold text-white mt-0.5">{activeTxn.merchant} (${activeTxn.amount.toFixed(2)})</h3>
+                <span className="text-xs font-mono text-cyan-700 dark:text-cyan-400 uppercase font-bold">Pipeline Output Decision</span>
+                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">{activeTxn.merchant} (${activeTxn.amount.toFixed(2)})</h3>
               </div>
 
               <div className="flex items-center gap-3">
@@ -187,30 +187,30 @@ export const LiveDemoSimulatorPage: React.FC = () => {
 
               <div className="md:col-span-8 space-y-3">
                 <div className="grid grid-cols-3 gap-2 text-xs font-mono">
-                  <div className="p-2.5 rounded-lg bg-gray-900 border border-gray-800">
-                    <span className="text-gray-400 block text-[10px]">ML Anomaly</span>
-                    <strong className="text-purple-400 text-sm">{activeTxn.anomalyScore}%</strong>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-gray-400 block text-[10px] font-bold">ML Anomaly</span>
+                    <strong className="text-purple-700 dark:text-purple-400 text-sm font-bold">{activeTxn.anomalyScore}%</strong>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-gray-900 border border-gray-800">
-                    <span className="text-gray-400 block text-[10px]">RF Terminal</span>
-                    <strong className={`text-sm ${activeTxn.isRFVerified ? 'text-cyan-400' : 'text-rose-400'}`}>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-gray-400 block text-[10px] font-bold">RF Terminal</span>
+                    <strong className={`text-sm font-bold ${activeTxn.isRFVerified ? 'text-cyan-700 dark:text-cyan-400' : 'text-rose-600 dark:text-rose-400'}`}>
                       {activeTxn.rfTrustScore}%
                     </strong>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-gray-900 border border-gray-800">
-                    <span className="text-gray-400 block text-[10px]">Contextual</span>
-                    <strong className="text-amber-400 text-sm">{activeTxn.contextualRiskScore}%</strong>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-gray-400 block text-[10px] font-bold">Contextual</span>
+                    <strong className="text-amber-700 dark:text-amber-400 text-sm font-bold">{activeTxn.contextualRiskScore}%</strong>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-800/40 text-xs text-purple-200 leading-relaxed">
+                <div className="p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/40 text-xs text-purple-900 dark:text-purple-200 leading-relaxed font-medium">
                   <strong>Risk Engine Conclusion:</strong> {activeTxn.explanation}
                 </div>
 
                 <div className="flex gap-3">
                   <button
                     onClick={() => openTransactionDetails(activeTxn.id)}
-                    className="py-2 px-4 rounded-xl text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-200 flex items-center gap-1"
+                    className="py-2 px-4 rounded-xl text-xs font-semibold bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-gray-200 border border-slate-200 dark:border-slate-700 flex items-center gap-1 transition-colors shadow-xs"
                   >
                     <span>View Complete Details</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -219,7 +219,7 @@ export const LiveDemoSimulatorPage: React.FC = () => {
                   {activeTxn.status === 'PENDING_VERIFICATION' && (
                     <button
                       onClick={() => openStepUpModal(activeTxn)}
-                      className="py-2 px-4 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-gray-950 shadow-md shadow-amber-500/20"
+                      className="py-2 px-4 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/20 transition-colors"
                     >
                       Authorize Step-Up 2FA
                     </button>
